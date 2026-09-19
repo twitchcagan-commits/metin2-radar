@@ -24,10 +24,13 @@ jobs:
           node-version: 22
           cache: npm
 
-      # Istege bagli yerel paketler (wasm/sharp bindingleri) platforma gore
-      # farkli cozumlendigi icin kilit dosyasiyla catisabiliyor. Bu isler
-      # tsx + supabase + cheerio disinda hicbir sey kullanmiyor, kurmuyoruz.
-      - run: npm ci --omit=optional
+      # Bilerek 'npm ci' degil.
+      # Kilit dosyasi Windows'ta uretiliyor ve wasm yerel bindingleri
+      # (@emnapi/*, @img/sharp-wasm32) platforma gore farkli cozumlendigi icin
+      # 'npm ci' Linux'ta "kilit dosyasi senkron degil" deyip hic baslamiyor.
+      # Bu isler yardimci is; sitenin uretim derlemesini Vercel kilit dosyasiyla
+      # yapiyor, yani belirlenimlilik orada korunuyor.
+      - run: npm install --no-audit --no-fund --omit=optional
 
       - name: Yaklaşan açılışları duyur
         env:
