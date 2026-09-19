@@ -28,3 +28,16 @@ export function serviceClient(): Db {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
+
+/**
+ * Supabase henüz bağlanmadıysa site çökmemeli: sayfalar boş durum gösterir.
+ * Bu yüzden okuma katmanı önce burayı sorar.
+ */
+export function isConfigured(): boolean {
+  return (
+    typeof process.env.NEXT_PUBLIC_SUPABASE_URL === 'string' &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL.length > 0 &&
+    typeof process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY === 'string' &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.length > 0
+  );
+}

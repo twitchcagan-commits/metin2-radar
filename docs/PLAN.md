@@ -61,7 +61,7 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` sürüyor · `[x]` bitti
 
 ---
 
-## Faz 3 — Site `[ ]`
+## Faz 3 — Site `[x]`
 
 | # | Görev | Tamamlanma kriteri |
 | --- | --- | --- |
@@ -124,3 +124,22 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` sürüyor · `[x]` bitti
 | 6.4 | Structured data | Sunucu sayfalarında JSON-LD |
 | 6.5 | Performans | Lighthouse performans ≥ 90, CLS < 0.05, mobilde de geçer |
 | 6.6 | `npm run check` yeşil | — |
+
+---
+
+## Ölçüm sonuçları (Faz 3 kabul kriteri)
+
+Lighthouse 13.5, mobil form faktörü, üretim derlemesi (`next start`), 2026-09-19:
+
+| Sayfa | Performans | Erişilebilirlik | En iyi pratikler | SEO | CLS |
+| --- | --- | --- | --- | --- | --- |
+| `/` | 99 | 100 | 100 | 100 | 0 |
+| `/sunucu/[slug]` (grafikli) | 96 | 100 | 100 | 100 | 0 |
+| `/sunucu/[slug]` (flag'li) | 95 | 100 | 100 | 100 | 0.009 |
+| `/takvim` | 99 | 100 | 100 | 100 | 0.001 |
+
+- 360px genişlikte yatay taşma yok (`scrollWidth == innerWidth`, taşan öğe listesi boş).
+- `prefers-reduced-motion: reduce` zorlanarak açıldığında sayfa tamamen durgun,
+  tüm içerik görünür ve kullanılabilir (Chrome `--force-prefers-reduced-motion`).
+- Hover'a bağımlı bilgi yok: sparkline mobilde kalıcı görünür, flag açıklamaları
+  detay sayfasında düz metin olarak da yazılı.
