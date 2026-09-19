@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "check": "npm run typecheck && npm run lint && npm run test",
     "seed": "tsx scripts/seed.ts",
-    "collect:once": "tsx collector/index.ts"
+    "collect:once": "tsx collector/index.ts",
+    "daily": "tsx collector/daily.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

@@ -43,7 +43,7 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` sürüyor · `[x]` bitti
 
 ---
 
-## Faz 2 — Rollup, retention, flag tespiti, skor `[ ]`
+## Faz 2 — Rollup, retention, flag tespiti, skor `[x]`
 
 | # | Görev | Tamamlanma kriteri |
 | --- | --- | --- |
