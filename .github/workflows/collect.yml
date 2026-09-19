@@ -24,7 +24,10 @@ jobs:
           node-version: 22
           cache: npm
 
-      - run: npm ci
+      # Istege bagli yerel paketler (wasm/sharp bindingleri) platforma gore
+      # farkli cozumlendigi icin kilit dosyasiyla catisabiliyor. Bu isler
+      # tsx + supabase + cheerio disinda hicbir sey kullanmiyor, kurmuyoruz.
+      - run: npm ci --omit=optional
 
       - name: Ölçümleri topla
         env:
