@@ -6,10 +6,21 @@ import { tr } from '@/lib/i18n/tr';
 
 import './globals.css';
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: { default: tr.site.name, template: `%s · ${tr.site.name}` },
   description: tr.site.description,
   applicationName: tr.site.name,
+  openGraph: {
+    type: 'website',
+    locale: 'tr_TR',
+    siteName: tr.site.name,
+    title: tr.site.name,
+    description: tr.site.description,
+  },
+  twitter: { card: 'summary_large_image' },
 };
 
 export const viewport: Viewport = {

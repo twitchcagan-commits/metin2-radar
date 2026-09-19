@@ -59,11 +59,37 @@ docs/PLAN.md            Faz planı ve tamamlanma kriterleri
 ## Komutlar
 
 ```bash
-npm run dev            # geliştirme sunucusu
-npm run check          # typecheck + lint + test — her faz sonunda YEŞİL olmalı
-npm run seed           # 5 örnek sunucu + 2 sahip ekler
-npm run collect:once   # toplayıcıyı yerelde tek seferlik çalıştırır (Faz 1)
+npm run dev              # geliştirme sunucusu
+npm run check            # typecheck + lint + test — her faz sonunda YEŞİL olmalı
+npm run build            # üretim derlemesi (dev sunucusu KAPALIYKEN çalıştır, .next çakışır)
+npm run seed             # 5 örnek sunucu + 2 sahip ekler
+npm run collect:once     # toplayıcıyı yerelde tek seferlik çalıştırır
+npm run daily            # rollup + retention + flag + skor, tek seferlik
+npm run announce         # yaklaşan açılış duyurusu, tek seferlik
+npm run discord:register # slash komutlarını Discord'a kaydeder
 ```
+
+Kurulum ve yayına alma adımları: `docs/KURULUM.md`.
+
+## Demo modu
+
+Supabase bağlanmamışsa (`NEXT_PUBLIC_SUPABASE_*` yok) okuma katmanı
+`lib/data/demo.ts` içindeki sentetik veriyi döner. Amaç: repo klonlandığı gibi
+`npm run dev` ile çalışsın. Supabase bağlandığı an demo modülü hiç çağrılmaz.
+
+## Sayfalar
+
+| Adres | Ne | Üretim |
+| --- | --- | --- |
+| `/` | Açılış takvimi + skora göre canlı liste + reklam blokları | statik |
+| `/takvim`, `/takvim/[tur]` | Açılış takvimi, tür filtresi gerçek segment | statik |
+| `/sunucu/[slug]` | Grafik, skor kırılımı, flag'ler, sahip geçmişi | SSG |
+| `/mezarlik` | Kapanmış sunucular, yaşam süreleri | statik |
+| `/sahipler/[owner_key]` | Sahip sicili | SSG |
+| `/admin` | Panel: sunucu, flag, reklam yönetimi | dinamik, allowlist |
+
+**Not:** filtre/parametre için `searchParams` kullanma — sayfayı dinamik yapar ve
+metadata `<head>` yerine gövdeye akar. Gerçek rota segmenti kullan.
 
 ## Veri modeli özeti
 
@@ -142,5 +168,6 @@ neon çerçeve) yok.
 
 Fazlar sırayla yapılır, birleştirilmez, atlanmaz. Her faz sonunda 10 satırlık özet:
 ne yapıldı, ne çalışıyor, nasıl test edilir, sıradaki faz ne.
+Faz 0-6 tamamlandı; ölçüm sonuçları `docs/PLAN.md` sonunda.
 Emin olunmayan **ürün** kararında varsayım yazılıp devam edilir.
 Emin olunmayan **ücretsizlik** kısıtında durulur ve sorulur.

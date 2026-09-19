@@ -5,11 +5,15 @@ import { Skull, UserRound } from 'lucide-react';
 
 import { AnimatedNumber } from '@/components/AnimatedNumber';
 import { SectionHeading } from '@/components/Section';
-import { getOwnerRecord } from '@/lib/data/servers';
+import { getAllOwnerKeys, getOwnerRecord } from '@/lib/data/servers';
 import { formatDate } from '@/lib/format';
 import { tr } from '@/lib/i18n/tr';
 
 export const revalidate = 3600;
+
+export async function generateStaticParams(): Promise<{ owner_key: string }[]> {
+  return (await getAllOwnerKeys()).map((owner_key) => ({ owner_key }));
+}
 
 export async function generateMetadata({
   params,

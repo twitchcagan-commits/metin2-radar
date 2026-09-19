@@ -21,11 +21,20 @@ import { SourceBadge } from '@/components/SourceBadge';
 import { StatTile } from '@/components/StatTile';
 import { TrendChart } from '@/components/TrendChart';
 import { TrendDelta } from '@/components/TrendDelta';
-import { getServerBySlug } from '@/lib/data/servers';
+import { getAllServerSlugs, getServerBySlug } from '@/lib/data/servers';
 import { formatDate } from '@/lib/format';
 import { tr } from '@/lib/i18n/tr';
 
 export const revalidate = 300;
+
+/**
+ * Bilinen sunucular önceden üretilir: hem daha hızlı, hem metadata akışa
+ * girmeyip doğrudan <head> içinde çıkar. Sonradan eklenen sunucular ilk
+ * istekte üretilir (dynamicParams varsayılan olarak açık).
+ */
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  return (await getAllServerSlugs()).map((slug) => ({ slug }));
+}
 
 export async function generateMetadata({
   params,
@@ -49,8 +58,33 @@ export default async function ServerPage({ params }: { params: Promise<{ slug: s
 
   const hasSeries = server.series.length >= 2;
 
+  /**
+   * Yapılandırılmış veri. Skoru `aggregateRating` olarak değil `Dataset`
+   * olarak veriyoruz: bu bir kullanıcı oylaması değil, bizim ölçümümüz —
+   * yıldız olarak göstermek yanıltıcı olurdu.
+   */
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name: `${server.name} — ${tr.score.title}`,
+    description: `${server.name} sunucusunun bağımsız ölçümle hesaplanan radar skoru, 7 günlük trendi ve manipülasyon sinyalleri.`,
+    creator: { '@type': 'Organization', name: tr.site.name },
+    variableMeasured: [
+      { '@type': 'PropertyValue', name: tr.score.title, value: server.score ?? undefined },
+      { '@type': 'PropertyValue', name: tr.metric.trend7d, value: server.trend7dPct ?? undefined },
+      { '@type': 'PropertyValue', name: tr.metric.uptime, value: server.uptimePct ?? undefined },
+    ],
+    temporalCoverage: server.opensAt ? `${server.opensAt.slice(0, 10)}/..` : undefined,
+  };
+
   return (
     <main className="mx-auto w-full max-w-5xl px-4 pb-4 pt-8 sm:px-6 sm:pt-12">
+      <script
+        type="application/ld+json"
+        // Veri bizim ürettiğimiz sayılardan oluşuyor, kullanıcı girdisi yok.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* --- Başlık --- */}
       <header className="rdr-enter" style={{ '--i': 0 } as React.CSSProperties}>
         <div className="flex items-start gap-4">
