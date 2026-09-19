@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import '@/lib/load-env';
 
 import { detectAll, type Sample } from '@/lib/analysis/detect';
 import { computeScore, type ScoreInput } from '@/lib/analysis/score';

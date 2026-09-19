@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import '@/lib/load-env';
 
 import { COLLECT_CONCURRENCY } from '@/lib/constants';
 import { serviceClient, type Db } from '@/lib/supabase/server';

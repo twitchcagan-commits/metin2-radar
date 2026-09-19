@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import '@/lib/load-env';
 
 /**
  * Slash komutlarını Discord'a kaydeder. Tek seferlik / komut değişince çalışır:

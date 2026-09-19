@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import '@/lib/load-env';
 
 import { announcementEmbed } from '@/lib/discord/embeds';
 import { lifespanDays } from '@/lib/format';

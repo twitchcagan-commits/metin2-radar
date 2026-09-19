@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import '@/lib/load-env';
 
 import { serviceClient } from '@/lib/supabase/server';
 import type { ServerStatus, ServerType } from '@/lib/constants';
