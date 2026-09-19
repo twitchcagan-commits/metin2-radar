@@ -152,5 +152,10 @@ Hedef performans ≥ 90 ve CLS < 0,05 idi; her sayfada tutuyor.
   detay sayfasında düz metin olarak da yazılı.
 - Sayılar sunucu render'ında gerçek değerleriyle basılır; sayma animasyonu ancak
   tarayıcıda gerçekten çalışabiliyorsa devreye girer (JavaScript kapalıyken de doğru sayı).
+- Grafikte iki ayrı Y ekseni: şişirilmiş beyan ile ölçülen Discord sayısı aynı
+  ölçeğe sıkıştırıldığında ölçüm çizgisi okunmaz hâle geliyordu. Artık ölçüm solda,
+  beyan sağda; karşılaştırılan şey mutlak değerler değil iki eğrinin şekli.
+- Çizgi çizim animasyonu bittiğinde kesik çizgi deseni tamamen kaldırılır:
+  dinlenme hâli hiçbir yol-uzunluğu ölçümüne bağlı değil, grafik asla eksik çizilmez.
 - Discord imza doğrulaması uçtan uca denendi: imzasız, yanlış imzalı ve eski zaman
   damgalı isteklerin üçü de 401 aldı; üç komut da 200 döndü.

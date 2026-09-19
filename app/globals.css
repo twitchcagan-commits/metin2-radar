@@ -206,12 +206,19 @@
  * recharts varsayılan animasyonu kapalı; çizimi biz yapıyoruz.
  * Çizgi soldan sağa çizilir, alan dolgusu arkadan opacity ile gelir.
  */
-.rdr-chart-draw .rdr-line-main .recharts-area-curve {
-  stroke-dasharray: var(--draw-length, 3000);
+/*
+ * Çizim animasyonu SADECE yol uzunluğu gerçekten ölçülebildiğinde uygulanır
+ * (hook, ölçüm başarılıysa data-drawn ekler). Ölçüm yoksa kesik çizgi deseni
+ * de yok: çizgi olduğu gibi, tam hâliyle görünür. Yanlış bir uzunluk tahmini
+ * grafiğin bir kısmını görünmez yapar — eksik grafik, kaçan animasyondan
+ * çok daha kötüdür.
+ */
+.rdr-chart-draw[data-drawn='true'] .rdr-line-main .recharts-area-curve {
+  stroke-dasharray: var(--draw-length);
   animation: rdr-draw 1200ms var(--ease-out) forwards;
 }
 
-.rdr-chart-draw .rdr-line-main .recharts-area-area {
+.rdr-chart-draw[data-drawn='true'] .rdr-line-main .recharts-area-area {
   opacity: 0;
   animation: rdr-fade-in 1200ms var(--ease-out) 200ms forwards;
 }
@@ -253,11 +260,11 @@
     display: none;
   }
 
-  .rdr-chart-draw .rdr-line-main .recharts-area-curve {
+  .rdr-chart-draw[data-drawn='true'] .rdr-line-main .recharts-area-curve {
     stroke-dasharray: none !important;
   }
 
-  .rdr-chart-draw .rdr-line-main .recharts-area-area {
+  .rdr-chart-draw[data-drawn='true'] .rdr-line-main .recharts-area-area {
     opacity: 1 !important;
   }
 }

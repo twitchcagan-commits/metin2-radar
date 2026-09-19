@@ -24,6 +24,13 @@ import { tr } from '@/lib/i18n/tr';
  *  - alan dolgusu opacity ile arkadan gelir
  *  - tooltip tamamen kendi bileşenimiz: ince çizgi imleci + yumuşak arka plan
  *  - recharts'ın kendi animasyonu kapalı, legend ve varsayılan grid stili yok
+ *
+ * İKİ AYRI Y EKSENİ — bu kozmetik değil, ürünün özü:
+ * sunucu sayacını 40 kat şişirdiğinde beyan 1.850, ölçtüğümüz Discord 16 olur.
+ * Tek eksende çizersek bizim ölçümümüz dibe yapışır ve okunmaz hâle gelir —
+ * yani tam da güvenilmez sayı, güvenilir sayıyı ezer. Her seri kendi ölçeğinde:
+ * solda ölçtüğümüz (vurgulu), sağda sunucunun beyanı (soluk, kesik çizgi).
+ * Karşılaştırılan şey mutlak değerler değil, iki eğrinin ŞEKLİ.
  */
 
 export type ChartPoint = {
@@ -40,8 +47,13 @@ const RANGES = [
 
 /**
  * Çizim animasyonu gerçek yol uzunluğuna bağlanır: SVG path'in uzunluğunu
- * ölçüp --draw-length'e yazarız. Sabit bir tahmin kullanılsa çizgi ya geç
- * belirir ya da kesik görünür.
+ * ölçüp --draw-length'e yazarız.
+ *
+ * Yeniden ölçmek şart: ResponsiveContainer ilk karede dar bir genişlikle
+ * render ediyor. O anki kısa uzunluğu yazıp bırakırsak, kapsayıcı gerçek
+ * genişliğine ulaştığında stroke-dasharray çizginin kalanını "boşluk" yapıyor
+ * ve grafik yarıda kesilmiş görünüyor. Bu yüzden boyut her değiştiğinde
+ * yeniden ölçüyoruz.
  */
 function useDrawLength(dataKey: string): React.RefObject<HTMLDivElement | null> {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -50,23 +62,54 @@ function useDrawLength(dataKey: string): React.RefObject<HTMLDivElement | null> 
     const host = ref.current;
     if (!host) return;
 
-    // recharts path'i ilk boyamadan sonra oluşur; bir frame bekliyoruz.
-    const raf = requestAnimationFrame(() => {
+    let raf = 0;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    /**
+     * Çizgiyi kesik çizgi desenine mahkûm bırakmıyoruz: animasyon biter bitmez
+     * deseni tamamen kaldırıyoruz.
+     *
+     * Sebep: desenin uzunluğu ölçülen yol uzunluğuna bağlı, ölçüm ise
+     * ResponsiveContainer'ın hangi genişlikte olduğuna. Ölçüm kısa çıkarsa
+     * çizginin kalanı "boşluk" olur ve grafik yarıda kesilmiş görünür.
+     * Dinlenme hâli hiçbir ölçüme bağlı olmamalı — eksik grafik, kaçan
+     * animasyondan çok daha kötüdür.
+     */
+    const settle = (): void => {
+      const path = host.querySelector<SVGPathElement>(
+        '.rdr-line-main .recharts-area-curve',
+      );
+      if (path) path.style.strokeDasharray = 'none';
+    };
+
+    const measure = (): void => {
       const path = host.querySelector<SVGPathElement>(
         '.rdr-line-main .recharts-area-curve',
       );
       if (!path) return;
-      host.style.setProperty('--draw-length', `${Math.ceil(path.getTotalLength())}`);
-    });
 
-    return () => cancelAnimationFrame(raf);
+      const length = path.getTotalLength();
+      if (length <= 0) return;
+
+      host.style.setProperty('--draw-length', String(Math.ceil(length * 1.05)));
+      // Ancak bu işaret konunca CSS kesik çizgi desenini uygular.
+      host.dataset.drawn = 'true';
+      path.addEventListener('animationend', settle, { once: true });
+    };
+
+    raf = requestAnimationFrame(measure);
+    // Animasyon 1200ms; bittiğine dair olay gelmezse yine de deseni kaldır.
+    timers.push(setTimeout(settle, 1600));
+
+    return () => {
+      cancelAnimationFrame(raf);
+      for (const timer of timers) clearTimeout(timer);
+    };
   }, [dataKey]);
 
   return ref;
 }
 
-// recharts tooltip prop'larını kendisi enjekte eder; JSX'te hepsini elle
-// vermediğimiz için Partial alıyoruz.
 function ChartTooltip({
   active,
   payload,
@@ -120,10 +163,10 @@ export function TrendChart({ points }: { points: readonly ChartPoint[] }) {
           <h2 className="text-sm font-medium">{tr.metric.trend30d}</h2>
           <p className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-text-faint">
             <SourceBadge source="measured" compact />
-            <span>Discord</span>
+            <span>Discord · sol eksen</span>
             <span aria-hidden>·</span>
             <SourceBadge source="declared" compact />
-            <span>{tr.metric.siteOnline}</span>
+            <span>{tr.metric.siteOnline} · sağ eksen</span>
           </p>
         </div>
 
@@ -155,7 +198,7 @@ export function TrendChart({ points }: { points: readonly ChartPoint[] }) {
       {/* Sabit yükseklik: iskeletle aynı, içerik gelince sayfa zıplamaz. */}
       <div ref={hostRef} className="rdr-chart-draw mt-4 h-[260px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={[...data]} margin={{ top: 8, right: 4, bottom: 0, left: -18 }}>
+          <AreaChart data={[...data]} margin={{ top: 8, right: 0, bottom: 0, left: -12 }}>
             <defs>
               <linearGradient id="rdr-discord-fill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="var(--color-accent)" stopOpacity={0.18} />
@@ -169,6 +212,7 @@ export function TrendChart({ points }: { points: readonly ChartPoint[] }) {
               vertical={false}
             />
 
+
             <XAxis
               dataKey="day"
               tick={{ fill: 'var(--color-text-faint)', fontSize: 11 }}
@@ -177,11 +221,24 @@ export function TrendChart({ points }: { points: readonly ChartPoint[] }) {
               minTickGap={28}
               tickFormatter={(value: string) => value.slice(5).replace('-', '.')}
             />
+            {/* Sol: bizim ölçümümüz. */}
             <YAxis
+              yAxisId="measured"
+              orientation="left"
+              tick={{ fill: 'var(--color-accent)', fontSize: 11 }}
+              tickLine={false}
+              axisLine={false}
+              width={46}
+              tickFormatter={(value: number) => formatNumber(value)}
+            />
+            {/* Sağ: sunucunun beyanı. Ayrı ölçek, soluk renk. */}
+            <YAxis
+              yAxisId="declared"
+              orientation="right"
               tick={{ fill: 'var(--color-text-faint)', fontSize: 11 }}
               tickLine={false}
               axisLine={false}
-              width={48}
+              width={46}
               tickFormatter={(value: number) => formatNumber(value)}
             />
 
@@ -192,6 +249,7 @@ export function TrendChart({ points }: { points: readonly ChartPoint[] }) {
 
             {hasDeclared && (
               <Area
+                yAxisId="declared"
                 type="monotone"
                 dataKey="declared"
                 stroke="var(--color-text-faint)"
@@ -206,6 +264,7 @@ export function TrendChart({ points }: { points: readonly ChartPoint[] }) {
 
             {hasDiscord && (
               <Area
+                yAxisId="measured"
                 type="monotone"
                 dataKey="discord"
                 stroke="var(--color-accent)"
