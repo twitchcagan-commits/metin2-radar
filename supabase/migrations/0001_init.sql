@@ -203,6 +203,29 @@ group by server_id, kind, created_at::date;
 
 grant select on clicks_daily to anon, authenticated;
 
+-- ---------------------------------------------------------------------------
+-- Açık izinler.
+--
+-- Supabase projesinde "Automatically expose new tables" kapalı olabilir (panel
+-- bunu öneriyor ve daha güvenli). O durumda anon rolünün tablolarda hiçbir
+-- yetkisi olmaz ve yukarıdaki RLS politikaları hiçbir işe yaramaz — okuma
+-- boş döner. Bu yüzden izinleri ayara bırakmıyoruz, burada açıkça veriyoruz.
+--
+-- Verilen tek yetki SELECT. INSERT/UPDATE/DELETE hiçbir role verilmez;
+-- yazma yalnızca service_role ile yapılır (RLS ve grant'ları baypas eder).
+-- ---------------------------------------------------------------------------
+grant select on owners        to anon, authenticated;
+grant select on servers       to anon, authenticated;
+grant select on metrics_raw   to anon, authenticated;
+grant select on metrics_daily to anon, authenticated;
+grant select on flags         to anon, authenticated;
+grant select on scores        to anon, authenticated;
+grant select on votes         to anon, authenticated;
+grant select on ads           to anon, authenticated;
+
+-- clicks: ham satırlar (ip_hash, ua_hash) kimseye açılmaz.
+revoke all on clicks from anon, authenticated;
+
 -- ===========================================================================
 -- Rollup + retention. Günlük job bunları çağırır (GitHub Actions).
 -- ===========================================================================
