@@ -99,7 +99,7 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` sürüyor · `[x]` bitti
 
 ---
 
-## Faz 5 — Discord `[ ]`
+## Faz 5 — Discord `[x]`
 
 | # | Görev | Tamamlanma kriteri |
 | --- | --- | --- |

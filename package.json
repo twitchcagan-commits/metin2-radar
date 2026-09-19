@@ -13,7 +13,9 @@
     "check": "npm run typecheck && npm run lint && npm run test",
     "seed": "tsx scripts/seed.ts",
     "collect:once": "tsx collector/index.ts",
-    "daily": "tsx collector/daily.ts"
+    "daily": "tsx collector/daily.ts",
+    "announce": "tsx collector/announce.ts",
+    "discord:register": "tsx scripts/register-commands.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

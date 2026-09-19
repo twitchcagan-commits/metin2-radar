@@ -109,6 +109,13 @@ export type AdRow = {
   created_at: string;
 };
 
+export type AnnouncementRow = {
+  id: number;
+  server_id: string;
+  kind: 'opening_soon';
+  sent_at: string;
+};
+
 export type VoteRow = {
   id: number;
   server_id: string;
@@ -135,6 +142,7 @@ export type Database = {
       scores: Table<ScoreRow, ScoreRow>;
       ads: Table<AdRow, Omit<AdRow, 'id' | 'created_at'>>;
       votes: Table<VoteRow, Omit<VoteRow, 'id' | 'created_at'>>;
+      announcements: Table<AnnouncementRow, Omit<AnnouncementRow, 'id' | 'sent_at'>>;
     };
     Views: {
       clicks_daily: { Row: ClicksDailyRow; Relationships: [] };
@@ -149,6 +157,7 @@ export type Database = {
       flag_kind: FlagKind;
       click_kind: ClickKind;
       ad_placement: AdPlacement;
+      announcement_kind: 'opening_soon';
     };
     CompositeTypes: Record<string, never>;
   };
