@@ -3,6 +3,7 @@ import {
   demoDead,
   demoDetail,
   demoLive,
+  demoOwner,
   demoSlugs,
   demoUpcoming,
 } from '@/lib/data/demo';
@@ -377,4 +378,72 @@ export async function getAllServerSlugs(): Promise<string[]> {
   const db = readClient();
   const { data } = await db.from('servers').select('slug');
   return (data ?? []).map((row) => row.slug);
+}
+
+export type OwnerRecord = {
+  ownerKey: string;
+  displayName: string;
+  notes: string | null;
+  servers: ServerSummary[];
+  /** Kapanmış sunucuların ortalama yaşam süresi (gün). */
+  avgLifespanDays: number | null;
+  stillAliveCount: number;
+  deadCount: number;
+};
+
+/**
+ * Sahip sicili. Bir sahibin art arda kısa ömürlü sunucu açma geçmişi,
+ * yeni sunucusunun da kısa ömürlü olacağının en güçlü işaretidir —
+ * bu yüzden sicili ayrı bir sayfa olarak tutuyoruz.
+ */
+export async function getOwnerRecord(ownerKey: string): Promise<OwnerRecord | null> {
+  const build = (
+    displayName: string,
+    notes: string | null,
+    servers: ServerSummary[],
+  ): OwnerRecord => {
+    const dead = servers.filter((s) => s.status === 'dead');
+    const lifespans = dead
+      .map((s) => s.lifespanDays)
+      .filter((value): value is number => value !== null);
+
+    return {
+      ownerKey,
+      displayName,
+      notes,
+      servers: [...servers].sort((a, b) => (b.opensAt ?? '').localeCompare(a.opensAt ?? '')),
+      avgLifespanDays:
+        lifespans.length > 0
+          ? lifespans.reduce((a, b) => a + b, 0) / lifespans.length
+          : null,
+      stillAliveCount: servers.filter((s) => s.status === 'active').length,
+      deadCount: dead.length,
+    };
+  };
+
+  if (!isConfigured()) {
+    const demo = demoOwner(ownerKey);
+    return demo ? build(demo.displayName, null, demo.servers) : null;
+  }
+
+  const db = readClient();
+
+  const { data: owner } = await db
+    .from('owners')
+    .select('owner_key, display_name, notes')
+    .eq('owner_key', ownerKey)
+    .maybeSingle();
+  if (!owner) return null;
+
+  const all = await buildSummaries(['upcoming', 'active', 'dead']);
+  const servers = all.filter((s) => s.ownerKey === ownerKey);
+
+  return build(owner.display_name ?? owner.owner_key, owner.notes, servers);
+}
+
+export async function getAllOwnerKeys(): Promise<string[]> {
+  if (!isConfigured()) return ['anka', 'kartal'];
+  const db = readClient();
+  const { data } = await db.from('owners').select('owner_key');
+  return (data ?? []).map((row) => row.owner_key);
 }

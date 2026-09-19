@@ -19,8 +19,13 @@ type Seed = {
   type: ServerType;
   levelRange: string;
   status: ServerStatus;
-  /** Açılıştan bu yana geçen gün (negatif = henüz açılmadı). */
+  /**
+   * Sunucunun kaç gündür açık olduğu (negatif = henüz açılmadı).
+   * Kapanmış sunucuda bu, yaşadığı gün sayısıdır; açılış tarihi
+   * diedDaysAgo + ageDays kadar geriye alınır.
+   */
   ageDays: number;
+  /** Kaç gün önce kapandı. Sadece status === 'dead' için. */
   diedDaysAgo?: number;
   peakOnline: number;
   /** Günlük büyüme oranı; 1'in altı düşüş. */
@@ -145,7 +150,7 @@ const SEEDS: Seed[] = [
     type: 'farm',
     levelRange: '1-250',
     status: 'dead',
-    ageDays: 96,
+    ageDays: 34,
     diedDaysAgo: 77,
     peakOnline: 640,
     growth: 0.94,
@@ -239,8 +244,10 @@ function toSummary(seed: Seed): ServerSummary {
     window.length >= 2 ? percentChange(window[0]!, window[window.length - 1]!) : null;
 
   const flags = flagsFor(seed);
+  // Kapanmışsa açılış, kapanıştan yaşadığı gün kadar öncesidir.
+  const openedDaysAgo = seed.ageDays + (seed.diedDaysAgo ?? 0);
   const opensAt =
-    seed.ageDays === 0 ? null : new Date(Date.now() - seed.ageDays * DAY_MS).toISOString();
+    seed.ageDays === 0 ? null : new Date(Date.now() - openedDaysAgo * DAY_MS).toISOString();
   const diedAt =
     seed.diedDaysAgo === undefined
       ? null

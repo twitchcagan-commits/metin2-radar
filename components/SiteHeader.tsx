@@ -3,8 +3,10 @@ import { Radar } from 'lucide-react';
 
 import { tr } from '@/lib/i18n/tr';
 
-// Mezarlık ve sahip sicili Faz 4'te eklenir; kırık bağlantı bırakmıyoruz.
-const LINKS = [{ href: '/takvim', label: tr.nav.calendar }] as const;
+const LINKS = [
+  { href: '/takvim', label: tr.nav.calendar },
+  { href: '/mezarlik', label: tr.nav.graveyard },
+] as const;
 
 export function SiteHeader() {
   return (

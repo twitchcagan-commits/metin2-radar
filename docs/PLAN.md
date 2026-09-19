@@ -84,7 +84,7 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` sürüyor · `[x]` bitti
 
 ---
 
-## Faz 4 — Yönetim, mezarlık, sahip sicili `[ ]`
+## Faz 4 — Yönetim, mezarlık, sahip sicili `[x]`
 
 | # | Görev | Tamamlanma kriteri |
 | --- | --- | --- |
