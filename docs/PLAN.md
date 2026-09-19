@@ -27,7 +27,7 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` sürüyor · `[x]` bitti
 
 ---
 
-## Faz 1 — Toplayıcı `[ ]`
+## Faz 1 — Toplayıcı `[x]`
 
 | # | Görev | Tamamlanma kriteri |
 | --- | --- | --- |
